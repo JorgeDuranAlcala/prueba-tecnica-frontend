@@ -4,6 +4,9 @@
 
 ```bash
     git clone https://github.com/JorgeDuranAlcala/prueba-tecnica-frontend.git
+    cd prueba-tecnica-frontend
+```
+```bash
     npm install
 ```
 

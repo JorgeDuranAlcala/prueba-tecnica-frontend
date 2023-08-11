@@ -15,19 +15,6 @@ const userData = computed(() => store.state.userData)
 const step = ref(1)
 const showFullData = ref(false)
 
-/*
-const userData = reactive({
-    nombre: "",
-    segundo_nombre: "",
-    apellido_paterno: "",
-    apellido_materno: "",
-    fecha_de_nacimiento_dia: "",
-    fecha_de_nacimiento_mes: "",
-    fecha_de_nacimiento_año: "",
-    email: "",
-    telefono: ""
-})
-*/
 
 
 const labels_list = ref(
@@ -74,7 +61,7 @@ const handleClick = function () {
     store.commit('nextStep')
 }
 
-const iniciar = async () => {
+const iniciar =  (values) => {
 
     const replacer = (key, value) => {
         if (typeof value === 'object' && value !== null) {
@@ -88,17 +75,21 @@ const iniciar = async () => {
     };
 
     const body = {
-    nombre: userData.nombre,
-    segundo_nombre: userData.segundo_nombre,
-    apellido_paterno: userData.apellido_paterno,
-    apellido_materno: userData.apellido_materno,
-    fecha_de_nacimiento:  `${userData.fecha_de_nacimiento_dia}-${userData.fecha_de_nacimiento_mes}-${userData.fecha_de_nacimiento_año}`,
-    email: userData.email,
-    telefono: userData.telefono
+    nombre: values.nombre,
+    segundo_nombre: values.segundo_nombre,
+    apellido_paterno: values.apellido_paterno,
+    apellido_materno: values.apellido_materno,
+    fecha_de_nacimiento:  new Date(values.fecha_de_nacimiento_dia, values.fecha_de_nacimiento_mes, values.fecha_de_nacimiento_año),
+    email: values.email,
+    telefono: values.telefono
 }
 
     const jsonString = JSON.stringify(body);
-    const data = await userService.post(jsonString);
+    userService.post(jsonString)
+    .then(() => {
+        alert('info saved')
+    })
+    .catch(err => alert('Error: ' + err.message))
     showFullData.value = true;
 }
 
@@ -106,7 +97,7 @@ const iniciar = async () => {
 
 <template>
     <Box col customClass="p-4 justify-center items-center bg-gray-100 w-4/12" >
-        <Box  customClass="bg-pink-400 p-2 w-full justify-between">
+        <Box  customClass="bg-pink-400 p-4 rounded w-full justify-between">
            <Box col customClass="gap-4">
                 <Title>Titulo del Formulario</Title>
                
@@ -123,18 +114,18 @@ const iniciar = async () => {
                 <template v-for="item in labels_list">
                   <template v-if="step >= item.step">
                      <Question :title="item.title" :labels="item.labels" :show="step === item.step" :step="item.step" >
-                        <Box v-if="item.condition(step)" class="bg-pink-400 p-2 w-10/12 my-10">{{ item.data(userData) }}</Box>
+                        <Box v-if="item.condition(step)" class="bg-pink-400 rounded p-2 w-10/12 my-10">{{ item.data(userData) }}</Box>
                      </Question>
                   </template>
                   
                 </template> 
             </Box>
              <template v-if="step >= 4">
-                <Box customClass="bg-gray-200 p-2 my-2 w-8/12 justify-end">
+                <Box customClass="bg-gray-200 rounded-top p-2 my-2 w-8/12 justify-end">
                     <Text>Si tus datos son correctos por favor continuemos</Text>
                 </Box>
-                <Button @click="iniciar">Iniciar</Button>
-                <Box v-if="showFullData" col customClass="bg-gray-200 p-2 my-2 gap-2">
+                <Button @click="iniciar(userData)">Iniciar</Button>
+                <Box v-if="showFullData" col customClass="bg-gray-200 rounded p-2 my-2 gap-2">
                     <Text>Fecha de nacimiento: {{ userData.fecha_de_nacimiento_dia }} {{ userData.fecha_de_nacimiento_mes }} {{ userData.fecha_de_nacimiento_año }}</Text>
                     <Text>Correo Electronico: {{ userData.email }} </Text>
                     <Text>Telefono celular: {{ userData.telefono }} </Text>
